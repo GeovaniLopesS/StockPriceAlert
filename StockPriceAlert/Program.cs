@@ -3,18 +3,19 @@ using System.Net;
 using System.Text.Json;
 class Program
 {
-   public static void Main(string[] args)
+    public static void Main(string[] args)
     {
-
-        // Aguarda 5 segundos entre cada chama do metodo de envio do email
-        Timer timer = new Timer(CheckStockQuote, null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
-
-        Console.ReadLine();
+        // chama o metodo da API 
+        while (true)
+        {
+            CheckStockQuote(float.Parse(args[0]), float.Parse(args[1]));
+            Thread.Sleep(5000);
+        }
     }
 
     // Obtem o valor da ação no momento da consulta
-    private static void CheckStockQuote(object state)
-    {
+    private static void CheckStockQuote(float upperBound, float lowerBound)
+    {      
        // definindo a url e instanciando um Uri 
         string QUERY_URL = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=PETR4.SA&apikey=88YPN0WHXEHKRW30";
         Uri queryUri = new Uri(QUERY_URL);
