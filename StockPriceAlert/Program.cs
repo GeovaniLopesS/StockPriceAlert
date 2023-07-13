@@ -1,33 +1,36 @@
 ﻿using StockPriceAlert;
-
+using System.Net;
+using System.Text.Json;
 class Program
 {
    public static void Main(string[] args)
     {
 
         // Aguarda 5 segundos entre cada chama do metodo de envio do email
-        Timer timer = new Timer(CheckQuotePrice, null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
+        Timer timer = new Timer(CheckStockQuote, null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
 
         Console.ReadLine();
     }
 
-    private static void CheckQuotePrice(object state)
+    // Obtem o valor da ação no momento da consulta
+    private static void CheckStockQuote(object state)
     {
-        // Simula um valor de cotação.
-        Random random = new Random();
-        decimal stockQuote = random.Next(5, 25);
-        Console.WriteLine(stockQuote);
+       
+        string QUERY_URL = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=PETR4.SA&apikey=88YPN0WHXEHKRW30";
+        Uri queryUri = new Uri(QUERY_URL);
 
-        // Verifica se a cotação atinge algum limite.
-        if (stockQuote <= 10)
+        using (WebClient client = new WebClient())
         {
-            // Envia o email
-            EmailSender.SendEmail("stockquotealert1@gmail.com", "geovanilopes2002@gmail.com", "compre!");
+            string jsonData = client.DownloadString(queryUri);
 
-        }
-        else if (stockQuote >= 20)
-        {
-            EmailSender.SendEmail("stockquotealert1@gmail.com", "geovanilopes2002@gmail.com", "venda!");
+            Console.WriteLine(jsonData);
+
+            JsonDocument jsonDocument = JsonDocument.Parse(jsonData);
+            JsonElement jsonElement = jsonDocument.RootElement.GetProperty("Global Quote");
+            
+            string stockQuote = jsonElement.GetProperty("05. price").ToString();
+
+            Console.WriteLine($"Stock quote: {stockQuote}");
         }
     }
 }
