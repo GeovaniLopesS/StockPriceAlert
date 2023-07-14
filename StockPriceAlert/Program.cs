@@ -33,21 +33,22 @@ class Program
             // obtendo o valor da ação a partir da chave"05. price"
             JsonDocument jsonDocument = JsonDocument.Parse(jsonData);
             JsonElement jsonElement = jsonDocument.RootElement.GetProperty("Global Quote");
-            string stockPrice = jsonElement.GetProperty("05. price").GetString();
-            Console.WriteLine("valor json: " + stockPrice);
-            decimal stockQuote = Convert.ToDecimal(stockPrice, new CultureInfo("en-US"));
-            Console.WriteLine("valor conversao " + stockQuote);
+
+            string stockPrice = jsonElement.GetProperty("05. price").GetString();    
+            decimal stockQuote = Convert.ToDecimal(stockPrice, CultureInfo.InvariantCulture);
 
             // verifica se a cotação atingiu algum limite
             if (stockQuote >= upperBound)
             {
                 string body = "A ação " + stock + " atingiu R$" + stockQuote + ". venda!";
                 EmailSender.SendEmail(body);
+
             }
             else if (stockQuote <= lowerBound)
             {
                 string body = "A ação " + stock + " atingiu R$" + stockQuote + ". compre!";
                 EmailSender.SendEmail(body);
+
             }
 
             Console.WriteLine(stockQuote);
