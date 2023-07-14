@@ -1,43 +1,51 @@
 ﻿using System;
-
+using System.Text.Json;
 using MailKit.Net.Smtp;
-using MailKit;
 using MimeKit;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace StockPriceAlert
 {
     class EmailSender
     {
-        public static void SendEmail(string remetente, string destinatario, string result)
+        public static void SendEmail(string body)
         {
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress("Tester Remetente", remetente));
-            message.To.Add(new MailboxAddress("Tester Destinatario", destinatario));
-            message.Subject = "Atenção!";
+            // lendo arquivo json com as configurações do servidor smtp
+            JsonDocument serverConfig = JsonDocument.Parse(File.ReadAllText("C:\\Users\\Geovani\\source\\repos\\StockPriceAlert\\StockPriceAlert\\serverconfig.json"));
+            JsonElement serverConfigElement = serverConfig.RootElement;
 
+            // recuperando informação das credenciais do email que enviará
+            string senderEmail = Environment.GetEnvironmentVariable("appEmail");
+            string senderPassword = Environment.GetEnvironmentVariable("appPassword");
+
+            Console.WriteLine(senderEmail + " " + senderPassword);
+
+            // define o remetente, destinatario, titulo e corpo do email
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress("Tester Remetente", senderEmail));
+            message.To.Add(new MailboxAddress("Tester Destinatario", serverConfigElement.GetProperty("reciever").GetString()));
+            message.Subject = "Atenção!";
             message.Body = new TextPart("plain")
             {
-                Text = @"Olá, isso é um teste3. " + result
+                Text = body
             };
 
+            // instancia um smtp client para enviar o email
             SmtpClient client = new SmtpClient();
 
             try
             {
-                client.Connect("smtp.gmail.com", 587, false);
-
-                client.Authenticate("stockquotealert1@gmail.com", "tyfqlotifdoulizp");
-
+                client.Connect(serverConfigElement.GetProperty("host").GetString(), 
+                    serverConfigElement.GetProperty("port").GetInt16(), 
+                    serverConfigElement.GetProperty("useSsl").GetBoolean());
+                client.Authenticate(senderEmail, "tyfqlotifdoulizp");
                 client.Send(message);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Erro!");
                 Console.WriteLine(ex.ToString());
             }
-            Console.ReadLine();
             client.Disconnect(true);
-
         }
     }
 }
