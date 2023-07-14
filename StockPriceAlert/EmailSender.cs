@@ -11,14 +11,12 @@ namespace StockPriceAlert
         public static void SendEmail(string body)
         {
             // lendo arquivo json com as configurações do servidor smtp
-            JsonDocument serverConfig = JsonDocument.Parse(File.ReadAllText("C:\\Users\\Geovani\\source\\repos\\StockPriceAlert\\StockPriceAlert\\serverconfig.json"));
+            JsonDocument serverConfig = JsonDocument.Parse(File.ReadAllText("C:\\Users\\geova\\Source\\Repos\\StockPriceAlert\\StockPriceAlert\\serverconfig.json"));
             JsonElement serverConfigElement = serverConfig.RootElement;
 
             // recuperando informação das credenciais do email que enviará
             string senderEmail = Environment.GetEnvironmentVariable("appEmail");
             string senderPassword = Environment.GetEnvironmentVariable("appPassword");
-
-            Console.WriteLine(senderEmail + " " + senderPassword);
 
             // define o remetente, destinatario, titulo e corpo do email
             var message = new MimeMessage();

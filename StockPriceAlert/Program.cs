@@ -4,8 +4,13 @@ using System.Net;
 using System.Text.Json;
 class Program
 {
+    // salva o valor da última cotação recuperada
+    private static decimal currentQuote { get; set; }
+
     public static void Main(string[] args)
     {
+        currentQuote = 0;
+
         // chama o metodo da API 
         while (true)
         {
@@ -32,26 +37,43 @@ class Program
 
             // obtendo o valor da ação a partir da chave"05. price"
             JsonDocument jsonDocument = JsonDocument.Parse(jsonData);
-            JsonElement jsonElement = jsonDocument.RootElement.GetProperty("Global Quote");
+            try
+            {
+                JsonElement jsonElement = jsonDocument.RootElement.GetProperty("Global Quote");
+            }
+            catch (Exception e) 
+            {
+                Console.WriteLine(e.Message);   
+            }   
 
             string stockPrice = jsonElement.GetProperty("05. price").GetString();    
             decimal stockQuote = Convert.ToDecimal(stockPrice, CultureInfo.InvariantCulture);
 
-            // verifica se a cotação atingiu algum limite
-            if (stockQuote >= upperBound)
+            //verifica se o valor encontrado é diferente do último valor verificado
+            if (stockQuote != currentQuote)
             {
-                string body = "A ação " + stock + " atingiu R$" + stockQuote + ". venda!";
-                EmailSender.SendEmail(body);
+                // verifica se a cotação atingiu algum limite e envia o email
+                if (stockQuote >= upperBound)
+                {
+                    string body = "A ação " + stock + " atingiu R$" + stockQuote + ". venda!";
+                    EmailSender.SendEmail(body);
 
+                }
+                else if (stockQuote <= lowerBound)
+                {
+                    string body = "A ação " + stock + " atingiu R$" + stockQuote + ". compre!";
+                    EmailSender.SendEmail(body);
+
+                }
+                Console.WriteLine("Email enviado!");
+                //salva o valor da cotação para controle
+                currentQuote = stockQuote;
             }
-            else if (stockQuote <= lowerBound)
+            // se o valor se manteve, então não envia email.
+            else
             {
-                string body = "A ação " + stock + " atingiu R$" + stockQuote + ". compre!";
-                EmailSender.SendEmail(body);
-
+                return;
             }
-
-            Console.WriteLine(stockQuote);
         }
     }
 }
