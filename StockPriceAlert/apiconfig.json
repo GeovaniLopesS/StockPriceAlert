@@ -1,0 +1,5 @@
+{
+
+  "url": "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={stock}&apikey={apiKey}",
+  "apiKey": "88YPN0WHXEHKRW30"
+}
