@@ -6,7 +6,7 @@ using MimeKit;
 
 namespace StockPriceAlert
 {
-    class EmailSender
+    static class EmailSender
     {   
         // credenciais do email que envia a mensagem
         private static string senderEmail;
@@ -19,13 +19,18 @@ namespace StockPriceAlert
         private static int smtpPort;
         private static bool useSsl;
 
-        public static void SendEmail(string body)
+        static EmailSender()
+        {
+            LoadConfig();
+        }
+
+        public static void SendEmail(string subject, string body)
         {
             // define o remetente, destinatario, titulo e corpo do email
             var message = new MimeMessage();
-            message.From.Add(new MailboxAddress("Tester Remetente", senderEmail));
+            message.From.Add(new MailboxAddress("Stock Quote Alert", senderEmail));
             message.To.Add(new MailboxAddress("Tester Destinatario", reciever));
-            message.Subject = "Atenção!";
+            message.Subject = "Atualização sobre a ação " + subject;
             message.Body = new TextPart("plain")
 
             {
