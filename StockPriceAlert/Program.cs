@@ -7,6 +7,9 @@ class Program
     // salva o valor da última cotação recuperada
     private static double currentQuote = 0;
 
+    // controle de envio de email
+    private static bool hasExceedUpper = false;
+    private static bool hasExceedLower = false;
 
     public static void Main(string[] args)
     {
@@ -18,7 +21,7 @@ class Program
         {
             CheckStockQuote(args[0], double.Parse(args[1]), double.Parse(args[2]));
             
-            Thread.Sleep(5000);
+            Thread.Sleep(12000);
         }
     }
 
@@ -33,17 +36,21 @@ class Program
         if (stockPrice != currentQuote)
         {
             // verifica se a cotação atingiu algum limite e envia o email
-            if (stockPrice >= upperBound)
+            if (stockPrice >= upperBound && !hasExceedUpper)
             {
-                string body = "A ação " + stock + " atingiu R$" + stockPrice + ". venda!";
+                string body = "A ação " + stock + " atingiu R$" + stockPrice + ". Venda!";
                 EmailSender.SendEmail(stock, body);
+                hasExceedUpper = true;
+                hasExceedLower = false;
+
 
             }
-            else if (stockPrice <= lowerBound)
+            else if (stockPrice <= lowerBound && !hasExceedLower)
             {
-                string body = "A ação " + stock + " atingiu R$" + stockPrice + ". compre!";
+                string body = "A ação " + stock + " atingiu R$" + stockPrice + ". Compre!";
                 EmailSender.SendEmail(stock, body);
-
+                hasExceedUpper = false;
+                hasExceedLower = true;
             }
 
             //salva o valor da cotação para controle
